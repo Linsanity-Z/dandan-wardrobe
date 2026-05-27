@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="蛋蛋的衣橱，支持分类、季节、管理和色系搭配。" />
+    <meta name="theme-color" content="#fffdf8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="蛋蛋的衣橱" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>蛋蛋的衣橱</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./app-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./app-icon-192.png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="hero" aria-label="衣橱概览">
+        <div class="hero__copy">
+          <p class="eyebrow">Private Wardrobe</p>
+          <h1>蛋蛋的衣橱</h1>
+          <p id="seasonLine" class="hero__text">正在整理今天适合穿什么...</p>
+        </div>
+        <div class="hero__panel" id="todayPanel">
+          <span class="hero__tag">今日建议</span>
+          <strong>先上传几件衣服</strong>
+          <p>我会根据季节、分类和色系帮你推荐搭配。</p>
+        </div>
+      </header>
+
+      <section class="stats" aria-label="衣橱统计">
+        <article>
+          <span id="totalCount">0</span>
+          <small>总件数</small>
+        </article>
+        <article>
+          <span id="seasonCount">0</span>
+          <small>当前季节</small>
+        </article>
+        <article>
+          <span id="idleCount">0</span>
+          <small>闲置提醒</small>
+        </article>
+      </section>
+
+      <main class="content">
+        <section class="view is-active" id="view-category" data-view="category">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Category</p>
+              <h2>首页</h2>
+            </div>
+            <div class="toolbar">
+              <input id="categorySearch" class="search" type="search" placeholder="搜索颜色、名称、风格" />
+              <button class="ghost" type="button" data-open-manage>新增</button>
+            </div>
+          </div>
+          <div class="category-board">
+            <aside class="category-rail" id="categoryRail" aria-label="大类列表"></aside>
+            <div class="gallery-wrap">
+              <div class="subcategory-panel" id="subcategoryPanel"></div>
+              <div class="gallery-head">
+                <div>
+                  <strong id="activeCategoryName">分类</strong>
+                  <span id="activeCategoryHint">按季节优先排序</span>
+                </div>
+                <select id="categorySort" aria-label="排序方式">
+                  <option value="smart">当前季节优先</option>
+                  <option value="newest">最近添加</option>
+                  <option value="worn">最近穿过</option>
+                  <option value="wearCount">穿着次数</option>
+                </select>
+              </div>
+              <div class="closet-grid" id="categoryGrid"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-season" data-view="season">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Season</p>
+              <h2>按春夏秋冬整理</h2>
+            </div>
+            <button class="ghost" id="shuffleOutfit" type="button">换一套推荐</button>
+          </div>
+          <div class="season-tabs" id="seasonTabs"></div>
+          <div class="outfit-card" id="outfitCard"></div>
+          <div class="closet-grid" id="seasonGrid"></div>
+        </section>
+
+        <section class="view" id="view-manage" data-view="manage">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Manage</p>
+              <h2>新增、编辑和备份</h2>
+            </div>
+            <button class="ghost" id="seedSamples" type="button">导入示例</button>
+          </div>
+
+          <div class="manage-layout">
+            <form class="editor" id="itemForm">
+              <input id="editingId" type="hidden" />
+              <label class="upload-box" for="imageInput">
+                <input id="imageInput" type="file" accept="image/*" />
+                <img id="imagePreview" alt="" />
+                <span id="uploadText">点击上传衣服照片</span>
+              </label>
+              <div class="ai-assist" id="aiAssist">
+                <div>
+                  <strong>AI 自动识别</strong>
+                  <p id="aiStatus">上传照片后会自动识别大类、细分、颜色和季节。</p>
+                </div>
+                <button class="ghost" id="recognizeImage" type="button">重新识别</button>
+              </div>
+
+              <div class="form-grid">
+                <label>
+                  名称
+                  <input id="itemName" required maxlength="28" placeholder="例如：白色短袖" />
+                </label>
+                <label>
+                  大类
+                  <select id="itemGroup"></select>
+                </label>
+                <label>
+                  细分种类
+                  <select id="itemCategory"></select>
+                </label>
+                <label>
+                  颜色
+                  <select id="itemColor"></select>
+                </label>
+                <label>
+                  风格
+                  <select id="itemStyle"></select>
+                </label>
+                <label>
+                  场合
+                  <select id="itemOccasion"></select>
+                </label>
+                <label>
+                  厚薄
+                  <select id="itemWarmth">
+                    <option value="薄">薄</option>
+                    <option value="适中">适中</option>
+                    <option value="厚">厚</option>
+                  </select>
+                </label>
+              </div>
+
+              <fieldset>
+                <legend>适合季节，可多选</legend>
+                <div class="check-row" id="seasonChecks"></div>
+              </fieldset>
+
+              <label>
+                备注
+                <textarea id="itemNotes" rows="3" placeholder="可以写购买时间、品牌、搭配注意事项"></textarea>
+              </label>
+
+              <div class="form-actions">
+                <button class="primary" type="submit">保存衣服</button>
+                <button class="ghost" id="resetForm" type="button">清空</button>
+              </div>
+            </form>
+
+            <section class="manager-panel">
+              <div class="quick-actions">
+                <label class="mini-upload">
+                  <input id="bulkInput" type="file" accept="image/*" multiple />
+                  批量上传到未分类
+                </label>
+                <button class="ghost" id="exportData" type="button">导出备份</button>
+                <label class="mini-upload">
+                  <input id="importData" type="file" accept="application/json" />
+                  导入备份
+                </label>
+              </div>
+              <input id="manageSearch" class="search" type="search" placeholder="搜索要修改的衣服" />
+              <div class="manage-list" id="manageList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-color" data-view="color">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Palette</p>
+              <h2>色系搭配推荐</h2>
+            </div>
+          </div>
+          <div class="palette" id="palette"></div>
+          <div class="color-advice" id="colorAdvice"></div>
+          <div class="closet-grid" id="colorGrid"></div>
+        </section>
+      </main>
+    </div>
+
+    <nav class="bottom-nav" aria-label="底部导航">
+      <button class="is-active" type="button" data-tab="category">
+        <span>首页</span>
+      </button>
+      <button type="button" data-tab="season">
+        <span>季节</span>
+      </button>
+      <button type="button" data-tab="manage">
+        <span>管理</span>
+      </button>
+      <button type="button" data-tab="color">
+        <span>色系</span>
+      </button>
+    </nav>
+
+    <dialog class="detail-dialog" id="detailDialog">
+      <button class="dialog-close" id="closeDetail" type="button" aria-label="关闭">×</button>
+      <div id="detailContent"></div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator && window.isSecureContext) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js").catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>
